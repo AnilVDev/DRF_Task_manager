@@ -11,6 +11,9 @@ from .serializers import TaskSerializer
 class TaskCreateListView(generics.ListCreateAPIView):
     """
     User Task creation and listing view
+
+    This view allows authenticated users to create new tasks and list their existing tasks.
+    The user must be authenticated using JWT tokens to access these functionalities.
     """
 
     permission_classes = [IsAuthenticated]
@@ -19,6 +22,15 @@ class TaskCreateListView(generics.ListCreateAPIView):
     serializer_class = TaskSerializer
 
     def get_queryset(self):
+        """
+        Retrieve tasks for the currently authenticated user.
+
+        Returns:
+            QuerySet: A queryset containing tasks for the authenticated user.
+
+        Raises:
+            ValidationError: If unable to fetch tasks, raises an error with a custom message.
+        """
         try:
             return Task.objects.filter(user=self.request.user)
         except Exception:
@@ -27,6 +39,15 @@ class TaskCreateListView(generics.ListCreateAPIView):
             )
 
     def perform_create(self, serializer):
+        """
+        Save the task instance with the authenticated user as the owner.
+
+        Args:
+            serializer (Serializer): The serializer instance containing validated task data.
+
+        Raises:
+            ValidationError: If the provided data is invalid or task creation fails, raises an error with a custom message.
+        """
         try:
             serializer.save(user=self.request.user)
         except ValidationError as e:
@@ -42,6 +63,9 @@ class TaskCreateListView(generics.ListCreateAPIView):
 class TaskUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
     """
     User Task Update and Deletion view
+
+    This view allows authenticated users to update or delete their tasks.
+    The user must be authenticated using JWT tokens to access these functionalities.
     """
 
     permission_classes = [IsAuthenticated]
@@ -50,6 +74,16 @@ class TaskUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = TaskSerializer
 
     def get_object(self):
+        """
+        Retrieve the task object, ensuring it belongs to the authenticated user.
+
+        Returns:
+            Task: The requested task object if it exists and belongs to the user.
+
+        Raises:
+            NotFound: If the task does not exist or does not belong to the user.
+            ValidationError: For general error handling during retrieval.
+        """
         try:
             obj = super().get_object()
             if obj.user != self.request.user:
@@ -66,6 +100,19 @@ class TaskUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
             )
 
     def update(self, request, *args, **kwargs):
+        """
+        Update the task instance with new data.
+
+        Args:
+            request (Request): The HTTP request containing the updated task data.
+
+        Returns:
+            Response: Updated task data if successful, or an error message with status code.
+
+        Raises:
+            ValidationError: If validation fails during the update.
+            Exception: If any unexpected error occurs during the update.
+        """
         try:
             return super().update(request, *args, **kwargs)
         except ValidationError as e:
@@ -83,6 +130,16 @@ class TaskUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
             )
 
     def destroy(self, request, *args, **kwargs):
+        """
+        Delete the specified task.
+
+        Returns:
+            Response: Success message if the task is deleted successfully, or an error message with status code.
+
+        Raises:
+            Task.DoesNotExist: If the task does not exist.
+            Exception: If any unexpected error occurs during deletion.
+        """
         try:
             task = self.get_object()
             task.delete()

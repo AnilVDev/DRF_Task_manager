@@ -16,7 +16,7 @@ class UserRegistrationView(generics.CreateAPIView):
 
     def post(self, request, *args, **kwargs):
         """
-        Handle user registration (POST).
+        Handle user registration by creating a new user instance.
         """
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
@@ -46,7 +46,7 @@ class UserLoginView(generics.GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         """
-        Handle user login (POST).
+        Handle user login by generating JWT tokens for the user.
         """
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
@@ -64,4 +64,4 @@ class UserLoginView(generics.GenericAPIView):
                 status=status.HTTP_200_OK,
             )
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)
