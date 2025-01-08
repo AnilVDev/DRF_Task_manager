@@ -1,5 +1,5 @@
-from rest_framework.response import Response 
-from rest_framework import status,generics 
+from rest_framework.response import Response
+from rest_framework import status,generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import ValidationError, NotFound
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -20,7 +20,7 @@ class TaskCreateListView(generics.ListCreateAPIView):
             return Task.objects.filter(user=self.request.user)
         except Exception as e:
             raise ValidationError({"error": "Unable to fetch tasks. Please try again later."})
-    
+
     def perform_create(self, serializer):
         try:
             serializer.save(user=self.request.user)
@@ -39,14 +39,14 @@ class TaskUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
     queryset = Task.objects.all()
-    serializer_class = TaskSerializer 
+    serializer_class = TaskSerializer
 
     def get_object(self):
         try:
             obj = super().get_object()
             if obj.user != self.request.user:
                 raise NotFound("Task not found")
-            return obj 
+            return obj
         except Task.DoesNotExist:
             raise NotFound({"error":"The requested task does not exist"})
         except Exception as e:
@@ -58,7 +58,7 @@ class TaskUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
         except ValidationError as e:
             return Response({"error": "Validation error occurred.", "details": e.detail}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            return Response({"error": "An error occurred while updating the task.", "details": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)  
+            return Response({"error": "An error occurred while updating the task.", "details": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def destroy(self, request, *args, **kwargs):
         try:
@@ -68,4 +68,4 @@ class TaskUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
         except Task.DoesNotExist:
             return Response({"error": "The task does not exist."}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            return Response({"error": "An error occurred while deleting the task.", "details": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)              
+            return Response({"error": "An error occurred while deleting the task.", "details": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

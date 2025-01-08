@@ -1,8 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 
-# Create your models here.
-
 class Task(models.Model):
     STATUS_CHOICE = [
         ('pending', 'Pending'),

@@ -12,7 +12,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     password_confirmation = serializers.CharField(write_only=True, required=True)
 
     class Meta:
-        model = get_user_model()  
+        model = get_user_model()
         fields = ['email', 'first_name', 'last_name', 'password', 'password_confirmation']
 
     def validate(self, attrs):
@@ -34,21 +34,9 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         """
         Create a new user instance with the validated data.
         """
-        validated_data.pop('password_confirmation') 
+        validated_data.pop('password_confirmation')
         user = get_user_model().objects.create_user(**validated_data)
         return user
-
-
-# class TokenSerializer(serializers.Serializer):
-#     refresh_Token = serializers.CharField()
-
-#     def validate(self, data):
-#         try:
-#             refresh = RefreshToken(data['refresh_Token'])
-#             access_token = refresh.access_token
-#             return {'access_token' : str(access_token), 'refresh_token': str(refresh)}
-#         except Exception as e:
-#             raise serializers.ValidationError({"refresh_Token": "Invalid refresh token."})
 
 class UserLoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
